@@ -8,7 +8,7 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 #[command(author, version, about = "Rust cat")]
 pub struct  Config {
     /// input file
-    file: Vec<String>,
+    files: Vec<String>,
 
     /// Number lines
     #[arg(short='n', long="number")]
@@ -24,6 +24,8 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    dbg!(config);
+    for filename in config.files {
+        println!("{}", filename);
+    }
     Ok(())
 }
