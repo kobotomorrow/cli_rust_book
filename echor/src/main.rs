@@ -4,7 +4,10 @@ use clap::Parser;
 #[command(author, version, about = "Rust echo")]
 struct Args {
     /// Input text
-    text: Vec<String>,
+    text: String,
+    
+    /// Optional texts
+    optional_texts: Vec<String>,
 
     /// Do not print newline
     #[arg(short = 'n')]
@@ -13,5 +16,10 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    print!("{}{}", args.text.join(" "), if args.omit_newline { "" } else { "\n" });
+    print!(
+        "{}{}{}{}",
+        args.text,
+        if args.optional_texts.is_empty() { "" } else { " "},
+        args.optional_texts.join(" "),
+        if args.omit_newline { "" } else { "\n" });
 }
