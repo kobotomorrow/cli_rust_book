@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::{error::Error, fs::File, io::{self, BufRead, BufReader}};
 
 use clap::Parser;
 
@@ -24,8 +24,25 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    for filename in config.files {
-        println!("{}", filename);
+    if config.files.is_empty() {
+        match open(&"-") {
+            Err(err) =>eprintln!("Faild to open {}: {}", "stdin", err),
+            Ok(_) => println!("Opened {}", "stdin")
+        }
     }
+    for filename in config.files {
+        match open(&filename) {
+            Err(err) => eprintln!("Failed to open {}: {}", filename, err),
+            Ok(_) => println!("Opend {}", filename)
+        }
+    }
+    // TODO: 失敗しても終了コードが0(正常)になっちゃってる
     Ok(())
+}
+
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+    }
 }
