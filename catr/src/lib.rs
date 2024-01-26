@@ -29,7 +29,7 @@ pub fn run(config: Config) -> MyResult<()> {
         match open(&filename) {
             Err(err) => eprintln!("Failed to open {}: {}", filename, err),
             Ok(mut file) => {
-                if let Err(err) = read(&mut file, config.number_lines) {
+                if let Err(err) = read(&mut file, config.number_lines, config.number_nonblank_lines) {
                     eprintln!("Failed to read {}: {}", filename, err);
                 }
             }
@@ -45,11 +45,20 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
     }
 }
 
-fn read(reader: &mut Box<dyn BufRead>, n: bool) -> MyResult<()> {
+fn read(reader: &mut Box<dyn BufRead>, n: bool, b: bool) -> MyResult<()> {
+    let mut empty_line_count = 0;
     for (i, line_result) in reader.lines().enumerate() {
         let line = line_result?;
-        if n {
-            println!("     {}	{}", i+1, line);
+
+        if b && line.is_empty() {
+            empty_line_count += 1;
+            println!();
+            continue;
+        }
+
+        let line_num = i + 1 - empty_line_count;
+        if n || b {
+            println!("     {}	{}", line_num, line);
         } else {
             println!("{}", line);
         }
