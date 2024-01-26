@@ -58,7 +58,7 @@ fn read(reader: &mut Box<dyn BufRead>, n: bool, b: bool) -> MyResult<()> {
 
         let line_num = i + 1 - empty_line_count;
         if n || b {
-            println!("     {}	{}", line_num, line);
+            println!("{:>6}\t{}", line_num, line);
         } else {
             println!("{}", line);
         }
