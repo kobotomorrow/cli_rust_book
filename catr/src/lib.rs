@@ -47,8 +47,8 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 
 fn read(reader: &mut Box<dyn BufRead>, n: bool, b: bool) -> MyResult<()> {
     let mut empty_line_count = 0;
-    for (i, line_result) in reader.lines().enumerate() {
-        let line = line_result?;
+    for (i, line) in reader.lines().enumerate() {
+        let line = line?;
 
         if b && line.is_empty() {
             empty_line_count += 1;
