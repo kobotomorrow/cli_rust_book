@@ -24,19 +24,17 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    if config.files.is_empty() {
-        match open(&"-") {
-            Err(err) =>eprintln!("Faild to open {}: {}", "stdin", err),
-            Ok(_) => println!("Opened {}", "stdin")
-        }
-    }
-    for filename in config.files {
+    let files = if config.files.is_empty() { vec![String::from("-")] } else { config.files };
+    for filename in files {
         match open(&filename) {
             Err(err) => eprintln!("Failed to open {}: {}", filename, err),
-            Ok(_) => println!("Opend {}", filename)
+            Ok(mut file) => {
+                if let Err(err) = read(&mut file) {
+                    eprintln!("Failed to read {}: {}", filename, err);
+                }
+            }
         }
     }
-    // TODO: 失敗しても終了コードが0(正常)になっちゃってる
     Ok(())
 }
 
@@ -45,4 +43,11 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
         "-" => Ok(Box::new(BufReader::new(io::stdin()))),
         _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
     }
+}
+
+fn read(reader: &mut Box<dyn BufRead>) -> MyResult<()> {
+    for (_, line) in reader.lines().enumerate() {
+        println!("{}", line?);
+    }
+    Ok(())
 }
