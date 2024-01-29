@@ -11,13 +11,31 @@ pub struct Config {
     files: Vec<String>,
     
     /// TBD
-    #[arg(short='n', long="lines")]
-    lines: usize,
+    #[arg(short='n', long="lines", value_parser = clap::value_parser!(u32).range(1..))]
+    lines: u32,
 
     /// TBD
-    #[arg(short='c', long="bytes")]
-    bytes: Option<usize>,
+    #[arg(short='c', long="bytes", value_parser = clap::value_parser!(u32).range(1..))]
+    bytes: Option<u32>,
 }
+
+// fn parse_positive_int(val: usize) -> MyResult<usize> {
+//     if val == 0 {
+//         Err(From::from("0"))
+//     } else {
+//         Ok(val)
+//     }
+// }
+
+// #[test]
+// fn test_parse_positive_int() {
+//     let res = parse_positive_int(3);
+//     assert!(res.is_ok());
+
+//     let res = parse_positive_int(0);
+//     assert!(res.is_err());
+//     assert_eq!(res.unwrap_err().to_string(), "0".to_string());
+// }
 
 pub fn get_args() -> MyResult<Config> {
     Ok(Config::parse())
