@@ -38,7 +38,11 @@ pub struct Config {
 // }
 
 pub fn get_args() -> MyResult<Config> {
-    Ok(Config::parse())
+    let mut config = Config::parse();
+    if config.files.is_empty() {
+        config.files = vec![String::from("-")]
+    }
+    Ok(config)
 }
 
 pub fn run(config: Config) -> MyResult<()> {
