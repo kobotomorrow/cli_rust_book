@@ -11,7 +11,7 @@ pub struct Config {
     files: Vec<String>,
     
     /// Number of lines [default 10]
-    #[arg(short='n', long="lines", value_parser = clap::value_parser!(u32).range(1..))]
+    #[arg(short='n', long="lines" , default_value_t = 10, value_parser = clap::value_parser!(u32).range(1..))]
     lines: u32,
 
     /// Number of bytes
