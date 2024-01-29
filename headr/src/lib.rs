@@ -10,11 +10,11 @@ pub struct Config {
     /// input file
     files: Vec<String>,
     
-    /// TBD
+    /// Number of lines [default 10]
     #[arg(short='n', long="lines", value_parser = clap::value_parser!(u32).range(1..))]
     lines: u32,
 
-    /// TBD
+    /// Number of bytes
     #[arg(short='c', long="bytes", value_parser = clap::value_parser!(u32).range(1..))]
     bytes: Option<u32>,
 }
