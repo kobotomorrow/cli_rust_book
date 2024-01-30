@@ -9,7 +9,7 @@ type MyResult<T> = Result<T, Box<dyn Error>>;
 pub struct Config {
     /// input file
     files: Vec<String>,
-    
+
     /// Number of lines
     #[arg(short='n', long="lines" , default_value_t = 10, value_parser = clap::value_parser!(u32).range(1..), group = "input")]
     lines: u32,
