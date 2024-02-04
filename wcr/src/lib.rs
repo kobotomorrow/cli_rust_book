@@ -51,7 +51,16 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
-            Ok(_) => println!("Opened {}", filename),
+            Ok(file) => {
+                let file_info = count(file)?;
+                println!(
+                    "{:>8}{:>8}{:>8} {}",
+                    file_info.num_lines,
+                    file_info.num_words,
+                    file_info.num_bytes,
+                    filename,
+                )
+            }
         }
     }
     Ok(())
