@@ -27,7 +27,7 @@ pub struct Config {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct FileInfo {
+struct FileInfo {
     num_lines: usize,
     num_words: usize,
     num_bytes: usize,
@@ -64,11 +64,24 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
     }
 }
 
-pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
+fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     let mut num_lines = 0;
     let mut num_words = 0;
     let mut num_bytes = 0;
     let mut num_chars = 0;
+
+    loop {
+        let mut line = String::new();
+        let len = file.read_line(&mut line)?;
+        if len == 0 {
+            break;
+        }
+
+        num_lines += 1;
+        num_bytes += len;
+        num_chars = line.chars().count();
+        num_words += line.split_whitespace().count();
+    }
 
     Ok(FileInfo {
         num_lines,
