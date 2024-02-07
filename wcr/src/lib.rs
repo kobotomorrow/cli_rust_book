@@ -53,13 +53,23 @@ pub fn run(config: Config) -> MyResult<()> {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
                 let file_info = count(file)?;
-                println!(
-                    "{:>8}{:>8}{:>8} {}",
-                    file_info.num_lines,
-                    file_info.num_words,
-                    file_info.num_bytes,
-                    filename,
-                )
+                if config.lines {
+                    print!("{:>8}", file_info.num_lines);
+                }
+                if config.words {
+                    print!("{:>8}", file_info.num_words);
+                }
+                if config.bytes {
+                    print!("{:>8}", file_info.num_bytes);
+                }
+                if config.chars {
+                    print!("{:>8}", file_info.num_chars);
+                }
+                if filename != "-" {
+                    println!(" {}", filename);
+                } else {
+                    println!();
+                }
             }
         }
     }
