@@ -57,23 +57,14 @@ pub fn run(config: Config) -> MyResult<()> {
             Err(err) => eprintln!("{}: {}", filename, err),
             Ok(file) => {
                 let file_info = count(file)?;
-                if config.lines {
-                    print!("{:>8}", file_info.num_lines);
-                }
-                if config.words {
-                    print!("{:>8}", file_info.num_words);
-                }
-                if config.bytes {
-                    print!("{:>8}", file_info.num_bytes);
-                }
-                if config.chars {
-                    print!("{:>8}", file_info.num_chars);
-                }
-                if filename != "-" {
-                    println!(" {}", filename);
-                } else {
-                    println!();
-                }
+                println!(
+                    "{}{}{}{}{}",
+                    format_field(file_info.num_lines, config.lines),
+                    format_field(file_info.num_words, config.words),
+                    format_field(file_info.num_bytes, config.bytes),
+                    format_field(file_info.num_chars, config.chars),
+                    if filename == "-" { String::new() } else { format!(" {}", filename) }
+                );
 
                 line_count += file_info.num_lines;
                 word_count += file_info.num_words;
@@ -134,9 +125,17 @@ fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
     })
 }
 
+fn format_field(value: usize, show: bool) -> String {
+    if show {
+        format!("{:>8}", value)
+    } else {
+        String::new()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{count, FileInfo};
+    use super::{count, FileInfo, format_field};
     use std::io::Cursor;
 
     #[test]
@@ -151,5 +150,12 @@ mod tests {
             num_chars: 48,
         };
         assert_eq!(info.unwrap(), expected);
+    }
+
+    #[test]
+    fn test_format_field() {
+        assert_eq!(format_field(1, true), "       1");
+        assert_eq!(format_field(1, false), "");
+        assert_eq!(format_field(100, true), "     100");
     }
 }
