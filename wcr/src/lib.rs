@@ -48,6 +48,10 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
+    let mut line_count = 0;
+    let mut word_count = 0;
+    let mut byte_count = 0;
+    let mut char_count = 0;
     for filename in &config.files {
         match open(filename) {
             Err(err) => eprintln!("{}: {}", filename, err),
@@ -70,9 +74,29 @@ pub fn run(config: Config) -> MyResult<()> {
                 } else {
                     println!();
                 }
+
+                line_count += file_info.num_lines;
+                word_count += file_info.num_words;
+                byte_count += file_info.num_bytes;
+                char_count += file_info.num_chars;
             }
         }
     }
+    if config.files.len() > 1 {
+        if config.lines {
+            print!("{:>8}", line_count);
+        }
+        if config.words {
+            print!("{:>8}", word_count);
+        }
+        if config.bytes {
+            print!("{:>8}", byte_count);
+        }
+        if config.chars {
+            print!("{:>8}", char_count);
+        }
+        println!(" total");
+    };
     Ok(())
 }
 
