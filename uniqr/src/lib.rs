@@ -1,4 +1,4 @@
-use std::{fs::File, io::{self, BufRead, BufReader}};
+use std::{fs::File, io::{self, BufRead, BufReader, Write}, ops::Add};
 
 use clap::Parser;
 
@@ -29,9 +29,16 @@ pub fn run(config: Config) -> MyResult<()> {
     let mut file = open(&input_filename).map_err(|e|
         format!("{}: {}", input_filename, e)
     )?;
+    let out_file = if let Some(filename) = config.out_file {
+        Some(File::create(filename)?)
+    } else {
+        None
+    };
+
     let mut cur_line = String::new();
     let mut next_line = String::new();
     let mut count = 1;
+    let mut out_text = String::new();
 
     let bytes = file.read_line(&mut cur_line)?;
     if bytes == 0 {
@@ -40,27 +47,34 @@ pub fn run(config: Config) -> MyResult<()> {
     loop {
         let bytes = file.read_line(&mut next_line)?;
         if bytes == 0 {
-            if config.count {
-                print!("{:>4} {}", count, cur_line);
+            let text = if config.count {
+                format!("{:>4} {}", count, cur_line)
             } else {
-                print!("{}", cur_line);
-            }
+                format!("{}", cur_line)
+            };
+            out_text = out_text.add(&text);
             break;
         }
         let cur = cur_line.lines().collect::<String>();
         let next = next_line.lines().collect::<String>();
         if cur != next {
-            if config.count {
-                print!("{:>4} {}", count, cur_line);
+            let text = if config.count {
+                format!("{:>4} {}", count, cur_line)
             } else {
-                print!("{}", cur_line);
-            }
+                format!("{}", cur_line)
+            };
+            out_text = out_text.add(&text);
             cur_line = next_line.clone();
             count = 1;
         } else {
             count += 1;
         }
         next_line.clear();
+    }
+    if let Some(mut file) = out_file {
+        let _ = file.write_all(out_text.as_bytes());
+    } else {
+        print!("{}", out_text);
     }
     Ok(())
 }
