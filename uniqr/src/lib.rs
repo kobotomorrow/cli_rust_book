@@ -1,3 +1,5 @@
+use std::{fs::File, io::{self, BufRead, BufReader}};
+
 use clap::Parser;
 
 type MyResult<T> = Result<T, Box<dyn std::error::Error>>;
@@ -23,6 +25,25 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
-    println!("{:?}", config);
+    let input_filename = config.in_file.unwrap();
+    let mut file = open(&input_filename).map_err(|e|
+        format!("{}: {}", input_filename, e)
+    )?;
+    let mut line = String::new();
+    loop {
+        let bytes = file.read_line(&mut line)?;
+        if bytes == 0 {
+            break;
+        }
+        print!("{}", line);
+        line.clear();
+    }
     Ok(())
+}
+
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+    }
 }
