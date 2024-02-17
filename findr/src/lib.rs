@@ -2,7 +2,7 @@ use std::error::Error;
 
 use clap::{Parser, ValueEnum};
 use regex::Regex;
-use walkdir::WalkDir;
+use walkdir::{WalkDir, DirEntry};
 
 // use crate::EntryType::*;
 
@@ -45,13 +45,32 @@ pub fn get_args() -> MyResult<Config> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
+    let entry_types = config.entry_types;
     for path in config.paths {
         for entry in WalkDir::new(path) {
             match entry {
                 Err(e) => eprintln!("{}", e),
-                Ok(entry) => println!("{}", entry.path().display()),
+                Ok(entry) => {
+                    if match_types(&entry, &entry_types) {
+                        println!("{}", entry.path().display())
+                    }
+                },
             }
         }
     }
     Ok(())
+}
+
+fn match_types(entry: &DirEntry, entry_types: &Vec<EntryType>) -> bool {
+    if entry_types.is_empty() { return true }
+    let file_type = entry.file_type();
+    for entry_type in entry_types {
+        let result = match entry_type {
+            EntryType::Dir => { file_type.is_dir() },
+            EntryType::File => { file_type.is_file() },
+            EntryType::Link => { file_type.is_symlink() },
+        };
+        if result { return true }
+    }
+    false
 }
