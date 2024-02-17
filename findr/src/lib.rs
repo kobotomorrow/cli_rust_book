@@ -46,14 +46,15 @@ pub fn get_args() -> MyResult<Config> {
 
 pub fn run(config: Config) -> MyResult<()> {
     let entry_types = config.entry_types;
+    let names = config.names;
     for path in config.paths {
         for entry in WalkDir::new(path) {
             match entry {
                 Err(e) => eprintln!("{}", e),
                 Ok(entry) => {
-                    if match_types(&entry, &entry_types) {
-                        println!("{}", entry.path().display())
-                    }
+                    if !match_types(&entry, &entry_types) { continue; }
+                    if !match_names(&entry, &names) { continue; }
+                    println!("{}", entry.path().display())
                 },
             }
         }
@@ -71,6 +72,24 @@ fn match_types(entry: &DirEntry, entry_types: &Vec<EntryType>) -> bool {
             EntryType::Link => { file_type.is_symlink() },
         };
         if result { return true }
+    }
+    false
+}
+
+fn match_names(entry: &DirEntry, names: &Vec<Regex>) -> bool {
+    if names.is_empty() { return true };
+
+    let file_name = if let Some(name) = entry.path().file_name() {
+        name.to_str().unwrap()
+    } else {
+        ""
+    };
+    if file_name.is_empty() { return false };
+
+    for name in names {
+        if name.is_match(file_name) {
+            return true
+        };
     }
     false
 }
